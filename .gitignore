@@ -28,5 +28,6 @@ demissoes_matricula_processados.txt
 _deploy_vps.py
 _check_vps.py
 _send_config.py
+_update_vps.py
 .DS_Store
 Thumbs.db

@@ -237,27 +237,29 @@ def modulo_habilitado(nome_modulo):
 
 # Chaves da seção [AFASTAMENTOS] e valores padrão (ifPonto)
 CODIGOS_AFASTAMENTO_PADRAO = {
-    'codigo_padrao': '1022',
-    'ferias': '1011',
-    'atestado': '1012',
-    'beneficio': '1013',
-    'licenca_remunerada': '1014',
-    'salario_maternidade': '1015',
-    'sat': '1016',
-    'suspensao_contrato': '1017',
-    'licenca_sem_remuneracao': '1018',
-    'aposentadoria_invalidez': '1019',
-    'servico_militar': '1020',
-    'licenca_paternidade': '1021',
-    'atestado_acidente_trabalho': '1016',
-    'outros': '1022',
+    'codigo_padrao': '',
+    'ferias': '',
+    'cat': '',
+    'beneficio': '',
+    'atestado': '',
+    'sat': '',
+    'servico_militar': '',
+    'abandono_emprego': '',
+    'suspensao_contrato': '',
+    'licenca_remunerada': '',
+    'salario_maternidade': '',
+    'licenca_sem_remuneracao': '',
+    'aposentadoria_invalidez': '',
+    'licenca_paternidade': '',
+    'atestado_acidente_trabalho': '',
+    'outros': '',
 }
 
 
 def ler_codigos_afastamento():
     """
     Lê [AFASTAMENTOS] do .config (código ifPonto por tipo).
-    Se a seção/chave não existir, usa os padrões sequenciais (1011+).
+    Chave presente e vazia fica sem código. Chave ausente usa o padrão do código.
     """
     codigos = dict(CODIGOS_AFASTAMENTO_PADRAO)
     try:
@@ -266,9 +268,12 @@ def ler_codigos_afastamento():
             return codigos
 
         secao = config['AFASTAMENTOS']
-        for chave in codigos:
-            if chave in secao and str(secao.get(chave) or '').strip():
-                codigos[chave] = str(secao.get(chave)).strip().strip('"')
+        for chave in secao:
+            valor = str(secao.get(chave) or '').strip().strip('"')
+            if valor:
+                codigos[chave] = valor
+            elif chave in codigos:
+                codigos[chave] = ''
         return codigos
     except Exception as e:
         print(f"❌ Erro ao ler [AFASTAMENTOS] do .config: {e}")

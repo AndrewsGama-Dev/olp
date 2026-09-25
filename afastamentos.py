@@ -49,6 +49,7 @@ def _normalizar_texto_afastamento(texto):
 # Ordem importa: regras mais especificas primeiro
 _REGRAS_TIPO_AFASTAMENTO = (
     (("ferias",), "ferias"),
+    (("c.a.t",), "cat"),
     (
         (
             "atestado por acidente",
@@ -64,7 +65,8 @@ _REGRAS_TIPO_AFASTAMENTO = (
     (("salario maternidade", "maternidade"), "salario_maternidade"),
     (("licenca paternidade", "paternidade"), "licenca_paternidade"),
     (("licenca sem remuneracao", "sem remuneracao"), "licenca_sem_remuneracao"),
-    (("s.a.t", "sat"), "sat"),
+    (("s.a.t",), "sat"),
+    (("abandono",), "abandono_emprego"),
     (("suspensao",), "suspensao_contrato"),
     (("aposentadoria",), "aposentadoria_invalidez"),
     (("servico militar", "militar"), "servico_militar"),
@@ -78,14 +80,14 @@ def resolver_codigo_afastamento(descricao):
     conforme [AFASTAMENTOS] no .config.
     """
     codigos = ler_codigos_afastamento()
-    padrao = codigos.get("codigo_padrao") or codigos.get("outros") or "1022"
+    padrao = codigos.get("codigo_padrao") or codigos.get("outros") or ""
     obs = _normalizar_texto_afastamento(descricao)
     if not obs:
         return padrao, "codigo_padrao"
 
     for termos, chave in _REGRAS_TIPO_AFASTAMENTO:
         if any(termo in obs for termo in termos):
-            return codigos.get(chave, padrao), chave
+            return codigos.get(chave) or padrao, chave
 
     return padrao, "codigo_padrao"
 

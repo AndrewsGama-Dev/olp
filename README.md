@@ -1,9 +1,8 @@
-# Integração Emops
+# Integração OLP
 
-eContador (Alterdata Pack) → CSV → ifPonto/stou (`https://stou.ifractal.com.br/emops/rest/`).
+eContador (Alterdata Pack) → CSV → ifPonto/stou (`https://stou.ifractal.com.br/olp/rest/`).
 
-Empresas: **9 Emops**, **10 Efire**, **11 Econtrol**.  
-Departamentos ignorados: **940 MAPA AP**, **973 MAPA RORAIMA**.
+Empresas no `.config`: **71** e **72**.
 
 ## Local
 
@@ -24,7 +23,7 @@ O `.config` **não** vai para o Git.
 
 ## Servidor
 
-Caminho: `/home/gogotech/integracao/emops`  
-Repositório: https://github.com/AndrewsGama-Dev/emops.git  
+Caminho: `/home/gogotech/integracao/olp`  
+Repositório: https://github.com/AndrewsGama-Dev/olp.git  
 
 Passo a passo: **[DEPLOY_SERVIDOR.md](DEPLOY_SERVIDOR.md)**
