@@ -171,19 +171,133 @@ def ler_codigo_empresa_filtro():
     return ids[0] if ids else None
 
 
+def normalizar_codigo_empresa(valor):
+    """00132 e 132 viram 132. Texto vazio continua vazio."""
+    texto = str(valor or "").strip()
+    if texto.isdigit():
+        return str(int(texto))
+    return texto
+
+
+_MAPA_EMPRESAS = None
+
+
+def carregar_empresas_econtador():
+    """
+    Empresas ativas do token: id interno eContador e externoid.
+    Cache no processo para não repetir a listagem em cada módulo.
+    """
+    global _MAPA_EMPRESAS
+    if _MAPA_EMPRESAS is not None:
+        return _MAPA_EMPRESAS
+
+    empresas = []
+    headers = obter_headers_api()
+    if not headers:
+        _MAPA_EMPRESAS = empresas
+        return empresas
+
+    url = "https://dp.pack.alterdata.com.br/api/v1/empresas"
+    offset = 0
+    while True:
+        params = {
+            "filter[empresas][ativa][EQ]": "true",
+            "page[limit]": "100",
+            "page[offset]": str(offset),
+        }
+        response = requests.get(url, headers=headers, params=params, timeout=60)
+        if response.status_code != 200:
+            print(f"❌ Erro ao listar empresas eContador: {response.status_code}")
+            break
+        itens = response.json().get("data") or []
+        for item in itens:
+            attrs = item.get("attributes") or {}
+            empresas.append({
+                "id": str(item.get("id") or ""),
+                "externoid": str(attrs.get("externoid") or ""),
+                "nome": str(attrs.get("nome") or ""),
+            })
+        if len(itens) < 100:
+            break
+        offset += 100
+        if offset:
+            time.sleep(0.2)
+
+    _MAPA_EMPRESAS = empresas
+    return empresas
+
+
+def _empresa_por_codigo_config(codigo, empresas):
+    """Casa o valor do .config com externoid (132) ou, se não achar, com o id interno (71)."""
+    chave = normalizar_codigo_empresa(codigo)
+    if not chave:
+        return None
+    for emp in empresas:
+        if normalizar_codigo_empresa(emp.get("externoid")) == chave:
+            return emp
+    for emp in empresas:
+        if normalizar_codigo_empresa(emp.get("id")) == chave:
+            return emp
+    return None
+
+
+def ids_internos_para_consultar():
+    """
+    Converte [FILTROS].codigo_empresa no id interno usado em filter[empresa.id].
+    O .config guarda o externoid (132, 135).
+    """
+    codigos = ler_codigos_empresa_filtro()
+    if not codigos:
+        return []
+    empresas = carregar_empresas_econtador()
+    internos = []
+    for codigo in codigos:
+        emp = _empresa_por_codigo_config(codigo, empresas)
+        if not emp or not emp.get("id"):
+            print(f"❌ codigo_empresa {codigo} não encontrado como externoid nem como id eContador")
+            continue
+        if emp["id"] not in internos:
+            internos.append(emp["id"])
+    return internos
+
+
+def codigo_empresa_para_csv(id_interno, externoid=""):
+    """Código da empresa no CSV/ifPonto: externoid sem zeros à esquerda (00132 → 132)."""
+    if externoid:
+        return normalizar_codigo_empresa(externoid)
+    chave = str(id_interno or "").strip()
+    if not chave:
+        return ""
+    for emp in carregar_empresas_econtador():
+        if emp.get("id") == chave:
+            return normalizar_codigo_empresa(emp.get("externoid")) or chave
+    return normalizar_codigo_empresa(chave)
+
+
 def empresas_para_consultar():
     """
-    IDs a consultar na API. [None] = não aplicar filter[empresa.id].
+    IDs internos a consultar na API. [None] = não aplicar filter[empresa.id].
+    Lista vazia = filtro configurado, mas nenhum código foi resolvido.
     """
-    ids = ler_codigos_empresa_filtro()
-    return ids if ids else [None]
+    if not ler_codigos_empresa_filtro():
+        return [None]
+    return ids_internos_para_consultar()
 
 
 def descrever_filtro_empresa():
-    ids = ler_codigos_empresa_filtro()
-    if not ids:
+    codigos = ler_codigos_empresa_filtro()
+    if not codigos:
         return "sem filtro (todas as empresas)"
-    return ", ".join(ids)
+    empresas = carregar_empresas_econtador()
+    partes = []
+    for codigo in codigos:
+        emp = _empresa_por_codigo_config(codigo, empresas)
+        if emp:
+            externo = normalizar_codigo_empresa(emp.get("externoid")) or codigo
+            partes.append(f"{externo} (id eContador {emp['id']})")
+        else:
+            partes.append(f"{codigo} (não encontrado)")
+    return ", ".join(partes)
 
 
 def _parse_bool_config(valor, default=True):

@@ -2,7 +2,7 @@
 
 eContador (Alterdata Pack) → CSV → ifPonto/stou (`https://stou.ifractal.com.br/olp/rest/`).
 
-Empresas no `.config`: **71** e **72**.
+Empresas no `.config`: **132** e **135** (`externoid` eContador).
 
 ## Local
 

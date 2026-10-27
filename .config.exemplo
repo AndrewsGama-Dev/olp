@@ -5,8 +5,9 @@
 token = "COLE_AQUI_O_JWT_DA_ECONTADOR"
 
 [FILTROS]
-# IDs eContador. Um ID ou varios separados por virgula. Vazio = todas as empresas do token.
-codigo_empresa = 71,72
+# Codigo ifPonto = externoid eContador, sem zeros a esquerda. 132 e 135.
+# Vazio = todas as empresas do token.
+codigo_empresa = 132,135
 # IDs de departamento que nao importam (nem o departamento nem os funcionarios). Vazio = nenhum.
 departamentos_ignorar =
 # true = usa demissoes_matricula_processados.txt (nao reenvia)

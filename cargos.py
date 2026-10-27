@@ -11,6 +11,7 @@ from config_reader import (
     ler_token_config,
     empresas_para_consultar,
     descrever_filtro_empresa,
+    codigo_empresa_para_csv,
     get_jsonapi_paginado,
     funcionario_departamento_ignorado,
     ler_departamentos_ignorar,
@@ -258,7 +259,7 @@ def mapear_cargo_para_csv(codigo, dados_funcao, id_empresa_padrao):
         'campo_chave': 'codigo_legado',  # 'codigo_legado' AS campo_chave
         'codigo_legado': codigo,  # f.ID_FUNCAO AS codigo_legado
         'nome': dados_funcao['nome'],  # f.DESCRICAO AS nome
-        'id-empresa': id_empresa_padrao,  # f.id_empresa AS "id-empresa"
+        'id-empresa': codigo_empresa_para_csv(id_empresa_padrao),
         'nome_cbo': '',  # '' AS nome_cbo (campo vazio conforme query)
         'nro_cbo': ''  # '' AS nro_cbo (campo vazio conforme query)
     }

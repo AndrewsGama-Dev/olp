@@ -13,6 +13,7 @@ from config_reader import (
     ler_token_config,
     empresas_para_consultar,
     descrever_filtro_empresa,
+    codigo_empresa_para_csv,
     ler_departamentos_ignorar,
     funcionario_departamento_ignorado,
 )
@@ -257,6 +258,7 @@ def buscar_dados_empresa(funcionario_id, headers):
                 return {
                     'id': empresa_info.get('id', ''),
                     'codigo': attributes.get('codigo', ''),
+                    'externoid': attributes.get('externoid', ''),
                     'nome': attributes.get('nome', ''),
                     'cnpj': attributes.get('cnpj', '')
                 }
@@ -730,8 +732,14 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None, included_index=No
         'uf': ex['uf'],
         'cep': attributes.get('cep', ''),
         'login': cpf_formatado,  # CPF formatado
-        'cod_empresa': empresa_info.get('id', '') if empresa_info else '',
-        'codigo_legado_empresa': empresa_info.get('id', '') if empresa_info else '',
+        'cod_empresa': codigo_empresa_para_csv(
+            empresa_info.get('id', '') if empresa_info else '',
+            empresa_info.get('externoid', '') if empresa_info else '',
+        ),
+        'codigo_legado_empresa': codigo_empresa_para_csv(
+            empresa_info.get('id', '') if empresa_info else '',
+            empresa_info.get('externoid', '') if empresa_info else '',
+        ),
         'dtdemissao': '',
         'regime_juridico': '',
         'tipo_salario': '',

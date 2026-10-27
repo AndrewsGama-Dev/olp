@@ -6,7 +6,7 @@ import time
 import hashlib
 import pytz
 import configparser
-from config_reader import obter_headers_api, ler_token_config
+from config_reader import obter_headers_api, ler_token_config, normalizar_codigo_empresa
 
 def carregar_configuracoes_target():
     """
@@ -240,11 +240,12 @@ def mapear_empresa_para_csv(empresa_api, detalhes=None):
     if detalhes and detalhes.get('attributes'):
         attributes.update(detalhes.get('attributes', {}))
     
-    # Mapeamento dos campos conforme a query original
+    # externoid (00132) vai no CSV como 132. id interno fica só na consulta da API.
+    codigo_empresa = normalizar_codigo_empresa(attributes.get('externoid') or empresa_id)
     empresa_csv = {
-        'codigo_legado': empresa_id,  # e.id_emp AS codigo_legado
+        'codigo_legado': codigo_empresa,
         'campo_chave': 'codigo_legado',  # Valor fixo
-        'nro': empresa_id,  # e.id_emp AS nro
+        'nro': codigo_empresa,
         'nome': attributes.get('nome', ''),  # p.nome - campo disponível na API
         'cnpj': attributes.get('cpfcnpj', ''),  # c.cnpj - usando o campo cpfcnpj da API
         'inscricao_estadual': '',  # Campo não disponível na API atual

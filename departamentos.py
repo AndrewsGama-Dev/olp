@@ -11,6 +11,7 @@ from config_reader import (
     ler_token_config,
     empresas_para_consultar,
     descrever_filtro_empresa,
+    codigo_empresa_para_csv,
     get_jsonapi_paginado,
     ler_departamentos_ignorar,
 )
@@ -250,7 +251,7 @@ def mapear_departamento_para_csv(dept_id, dados_departamento):
         'codigo_legado': codigo,
         'nome': dados_departamento['nome'],
         'conta': codigo,
-        'id-empresa': dados_departamento['empresa_id']
+        'id-empresa': codigo_empresa_para_csv(dados_departamento['empresa_id'])
     }
     
     return departamento_csv
